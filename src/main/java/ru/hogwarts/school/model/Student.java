@@ -1,13 +1,11 @@
 package ru.hogwarts.school.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.DialectOverride;
 
 @Entity
 public class Student {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-
     private Long id;
 
     private String name;
@@ -16,7 +14,7 @@ public class Student {
     @Version
     private Long version;
 
-    public Student (String name, int age) {
+    public Student(String name, int age) {
         this.name = name;
         this.age = age;
     }

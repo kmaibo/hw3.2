@@ -1,17 +1,9 @@
 package ru.hogwarts.school.service;
 
-import jakarta.persistence.Access;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
-import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
-
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +16,7 @@ public class FacultyService {
     }
 
     public Faculty create(Faculty faculty) {
+        faculty.setId(null);
         return facultyRepository.save(faculty);
     }
 
@@ -48,5 +41,4 @@ public class FacultyService {
                 filter(f -> f.getColor().equals(color))
                 .collect(Collectors.toList());
     }
-
 }
