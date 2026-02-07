@@ -15,6 +15,9 @@ public class Student {
     @JoinColumn(name = "faculty_id")
     private Faculty faculty;
 
+    @OneToOne(mappedBy = "student")
+    private Avatar avatar;
+
     @Version
     private Long version;
 

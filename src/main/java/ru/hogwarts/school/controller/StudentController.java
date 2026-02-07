@@ -33,7 +33,8 @@ public class StudentController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam (required = false) int age, @RequestParam (required = false) int age2) {
+    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam(required = false) int age,
+                                                             @RequestParam (required = false) int age2) {
         return ResponseEntity.ok(studentService.getAllStudents());
     }
 
