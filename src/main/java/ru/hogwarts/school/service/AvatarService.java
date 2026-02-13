@@ -1,7 +1,11 @@
 package ru.hogwarts.school.service;
 
+
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.AvatarRepository;
@@ -12,15 +16,21 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Service
+@Transactional
 public class AvatarService {
 
+    @Value("${students.avatar.dir.path}")
+    private  String upload;
+
+    private final StudentService studentService;
     private final AvatarRepository avatarRepository;
 
-    public AvatarService(AvatarRepository avatarRepository) {
+    public AvatarService(AvatarRepository avatarRepository, StudentService studentService) {
         this.avatarRepository = avatarRepository;
+        this.studentService = studentService;
     }
 
-    private final String upload = "uploads/avatars/";
+
 
     public Avatar save(Long studentId, MultipartFile file) throws IOException {
         String filePath = upload + studentId + "_" + file.getOriginalFilename();
