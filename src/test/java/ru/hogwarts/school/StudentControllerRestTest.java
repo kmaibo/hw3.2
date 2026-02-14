@@ -6,10 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
+import org.springframework.test.context.ActiveProfiles;
+import ru.hogwarts.school.model.Student;
 
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 public class StudentControllerRestTest {
@@ -19,21 +26,37 @@ public class StudentControllerRestTest {
 
     @Test
     public void testGetAllStudents() {
-        ResponseEntity<String> response =  testRestTemplate.getForEntity("/students", String.class);
-        assertEquals (HttpStatus.OK,  response.getStatusCode());
+        testRestTemplate.postForEntity("/students", new Student("Alice", 16), Student.class);
+        testRestTemplate.postForEntity("/students", new Student("Bob", 17), Student.class);
+
+        ResponseEntity<List<Student>> response = testRestTemplate.exchange(
+                "/students", HttpMethod.GET,
+                null, new ParameterizedTypeReference<List<Student>>() {
+                }
+        );
     }
 
     @Test
     public void testGetStudentById() {
-        ResponseEntity<String> response =  testRestTemplate.getForEntity("/students/1", String.class);
-        assertEquals (HttpStatus.OK,  response.getStatusCode());
+        Student created = testRestTemplate.postForObject(
+                "/students", new Student("Alice", 20), Student.class);
+
+        ResponseEntity<Student> response = testRestTemplate.getForEntity(
+                "/students/" + created.getId(), Student.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody().getName()).isEqualTo("Alice");
     }
 
     @Test
     public void testCreateStudent() {
-        String newStudent = "{\"name\" : \"Иван\", \"age\" : 20}";
-        ResponseEntity<String> response = testRestTemplate.postForEntity("/students", newStudent, String.class);
-        assertEquals (HttpStatus.CREATED,  response.getStatusCode());
+        Student student = new Student("Alice", 20);
+
+        ResponseEntity<Student> response = testRestTemplate.postForEntity("/students", student, Student.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getBody().getId()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo("Alice");
     }
 
     @Test
