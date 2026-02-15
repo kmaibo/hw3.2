@@ -21,8 +21,9 @@ public class FacultyController {
     }
 
     @PostMapping
-    public Faculty create(@RequestBody Faculty faculty) {
-        return facultyService.create(faculty);
+    public ResponseEntity<Faculty> create(@RequestBody Faculty faculty) {
+        Faculty created = facultyService.create(faculty);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/{id}")
@@ -56,9 +57,9 @@ public class FacultyController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteFaculty(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFaculty(@PathVariable Long id) {
         facultyService.deleteFaculty(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/color/{color}")

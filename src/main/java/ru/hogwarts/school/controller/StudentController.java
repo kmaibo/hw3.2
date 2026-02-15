@@ -1,10 +1,13 @@
 package ru.hogwarts.school.controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 
@@ -19,8 +22,12 @@ public class StudentController {
     }
 
     @PostMapping
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
+        Student created = studentService.createStudent(student);
+
+        URI location = URI.create("/student/" + created.getId());
+
+        return ResponseEntity.created(location).body(created);
     }
 
     @GetMapping("/{id}")
@@ -39,9 +46,9 @@ public class StudentController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @GetMapping("/age/{age}")

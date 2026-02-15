@@ -7,9 +7,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.boot.resttestclient.TestRestTemplate;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -24,7 +23,6 @@ import java.util.List;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureTestRestTemplate
 public class FacultyControllerRestTest {
 
 
@@ -78,7 +76,7 @@ public class FacultyControllerRestTest {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(response.getBody().getId()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo("Гуманитарный");
+        assertThat(response.getBody().getName()).isEqualTo("Слизерин");
 
     }
 

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name = "avatar" , schema = "public")
 
 public class Avatar {
 
