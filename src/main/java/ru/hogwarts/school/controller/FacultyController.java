@@ -7,8 +7,10 @@ import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.FacultyService;
 
+import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/faculty")
@@ -23,13 +25,15 @@ public class FacultyController {
     @PostMapping
     public ResponseEntity<Faculty> create(@RequestBody Faculty faculty) {
         Faculty created = facultyService.create(faculty);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        URI location = URI.create("/faculty/" + created.getId());
+        return ResponseEntity.created(location)
+                .body(faculty);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Faculty> getFacultyById(@PathVariable Long id) {
-        Faculty faculty = facultyService.getFacultyById(id);
-        if (faculty == null) {
+    public ResponseEntity<Optional<Faculty>> getFacultyById(@PathVariable Long id) {
+        Optional<Faculty> faculty = facultyService.getFacultyById(id);
+        if (faculty.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(faculty, HttpStatus.OK);

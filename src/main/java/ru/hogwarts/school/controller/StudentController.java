@@ -2,7 +2,6 @@ package ru.hogwarts.school.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.service.StudentService;
@@ -10,6 +9,7 @@ import ru.hogwarts.school.service.StudentService;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/student")
@@ -31,24 +31,26 @@ public class StudentController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-        Student student = studentService.getStudentById(id);
-        if (student == null) {
+    public ResponseEntity<Optional<Student>> getStudentById(@PathVariable Long id) {
+        Optional<Student> student = studentService.getStudentById(id);
+
+        if (student != null && student.isPresent()) {
+            return ResponseEntity.ok(Optional.of(student.get()));
+        } else {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(student);
     }
 
     @GetMapping
-    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam(required = false) int age,
-                                                             @RequestParam (required = false) int age2) {
+    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam(required = false) Integer age,
+                                                             @RequestParam (required = false) Integer age2) {
         return ResponseEntity.ok(studentService.getAllStudents());
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/age/{age}")

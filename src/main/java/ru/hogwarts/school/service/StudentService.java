@@ -7,6 +7,7 @@ import ru.hogwarts.school.repository.StudentRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,8 +25,8 @@ public class StudentService {
         return studentRepository.save(student);
     }
 
-    public Student getStudentById (Long id) {
-        return studentRepository.findById(id).get();
+    public Optional<Student> getStudentById (Long id) {
+        return studentRepository.findById(id);
     }
 
     public List<Student> getAllStudents() {
@@ -47,7 +48,7 @@ public class StudentService {
     }
 
     public Faculty getFacultyById(Long facultyId) {
-        Student student = getStudentById(facultyId);
-        return student.getFaculty();
+        Optional<Student> student = getStudentById(facultyId);
+        return student.get().getFaculty();
     }
 }

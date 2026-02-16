@@ -1,23 +1,23 @@
 package ru.hogwarts.school;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.service.FacultyService;
 
 import java.util.List;
+import java.util.Optional;
 
 @WebMvcTest(FacultyController.class)
 public class FacultyControllerMvcTest {
@@ -25,8 +25,13 @@ public class FacultyControllerMvcTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private FacultyService facultyService;
+
+    @AfterEach
+    void resetMock() {
+        reset(facultyService);
+    }
 
     @Test
     public void testGetAllFaculties() throws Exception {
@@ -47,7 +52,7 @@ public class FacultyControllerMvcTest {
         Faculty faculty = new Faculty("Слизерин", "Brown");
         faculty.setId(1L);
 
-        when(facultyService.getFacultyById(1L)).thenReturn(faculty);
+        when(facultyService.getFacultyById(1L)).thenReturn(Optional.of(faculty));
 
         mockMvc.perform(get("/faculty/1")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -72,7 +77,10 @@ public class FacultyControllerMvcTest {
         mockMvc.perform(post("/faculty")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Слизерин"))
+                .andExpect(jsonPath("$.color").value("Brown"));
+
 
     }
 
@@ -81,7 +89,7 @@ public class FacultyControllerMvcTest {
         Faculty existingFaculty = new Faculty("Слизерин", "Green");
         Faculty updatedFaculty = new Faculty("Слизерин", "Blue");
 
-        when(facultyService.updateFaculty( any(Faculty.class)))
+        when(facultyService.updateFaculty(any(Faculty.class)))
                 .thenReturn(updatedFaculty);
 
         String json = """
