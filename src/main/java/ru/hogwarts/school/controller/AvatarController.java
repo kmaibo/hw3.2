@@ -4,9 +4,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.service.AvatarService;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/avatars")
@@ -52,5 +54,10 @@ public class AvatarController {
         } catch (IOException e) {
             return ResponseEntity.status(500).body(null);
         }
+    }
+
+    @GetMapping
+    public List<Avatar> getAllAvatars(@RequestParam("page") int page, @RequestParam("size") int size) {
+        return avatarService.getAllAvatars(page, size);
     }
 }

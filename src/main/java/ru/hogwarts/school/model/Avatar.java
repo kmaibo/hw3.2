@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "avatar" , schema = "public")
+@Table(name = "avatar", schema = "public")
 
 public class Avatar {
 
@@ -25,7 +25,8 @@ public class Avatar {
     @JoinColumn(name = "student_id", referencedColumnName = "id")
     private Student student;
 
-    public Avatar() {}
+    public Avatar() {
+    }
 
     public Avatar(String filePath, Long fileSize, String mediaType, byte[] data) {
         this.filePath = filePath;
