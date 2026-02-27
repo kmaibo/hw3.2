@@ -1,17 +1,13 @@
 package ru.hogwarts.school.service;
 
-import jakarta.persistence.Access;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import ru.hogwarts.school.controller.FacultyController;
 import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repository.FacultyRepository;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,11 +20,12 @@ public class FacultyService {
     }
 
     public Faculty create(Faculty faculty) {
+        faculty.setId(null);
         return facultyRepository.save(faculty);
     }
 
-    public Faculty getFacultyById(Long id) {
-        return facultyRepository.findById(id).get();
+    public Optional<Faculty> getFacultyById(Long id) {
+        return facultyRepository.findById(id);
     }
 
     public List<Faculty> getAllFaculty() {
@@ -49,4 +46,12 @@ public class FacultyService {
                 .collect(Collectors.toList());
     }
 
+    public Collection<Faculty> findFacultiesByColorContainingIgnoreCaseOrNameContainingIgnoreCase(String color, String name) {
+        return facultyRepository.findFacultiesByColorContainingIgnoreCaseOrNameContainingIgnoreCase(color, name);
+    }
+
+    public Collection<Student> getStudentsByFacultyId(Long facultyId) {
+        Optional<Faculty> faculty = getFacultyById(facultyId);
+        return faculty.get().getStudents();
+    }
 }
