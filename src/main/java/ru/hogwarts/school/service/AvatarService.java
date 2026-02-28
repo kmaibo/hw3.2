@@ -16,10 +16,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 @Transactional
 public class AvatarService {
+
+    Logger logger = Logger.getLogger(AvatarService.class.getName());
 
     @Value("${students.avatar.dir.path}")
     private  String upload;
@@ -35,6 +38,7 @@ public class AvatarService {
 
 
     public Avatar save(Long studentId, MultipartFile file) throws IOException {
+        logger.info("Was invoked save");
         String filePath = upload + studentId + "_" + file.getOriginalFilename();
         Path path = Paths.get(filePath);
         Files.write(path, file.getBytes());
@@ -53,11 +57,13 @@ public class AvatarService {
     }
 
     public byte[] getAvatarFromDb(Long studentId) {
+        logger.info("Was invoked method for get avatar from DB");
         Avatar avatar = avatarRepository.findByStudentId(studentId);
         return avatar != null ? avatar.getData() : null;
     }
 
     public byte[] getAvatarFromDisk(Long studentId) throws IOException {
+        logger.info("Was invoked method for get avatar from Disk");
         Avatar avatar = avatarRepository.findByStudentId(studentId);
         if (avatar == null) return null;
 
@@ -66,6 +72,7 @@ public class AvatarService {
     }
 
     public List<Avatar> getAllAvatars(Integer page, Integer size) {
+        logger.info("Was invoked method for get all avatars");
         PageRequest pageRequest = PageRequest.of(page - 1, size);
         return avatarRepository.findAll(pageRequest).getContent();
     }
