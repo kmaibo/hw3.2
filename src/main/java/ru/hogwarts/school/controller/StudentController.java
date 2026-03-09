@@ -9,6 +9,8 @@ import ru.hogwarts.school.service.StudentService;
 
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @RestController
@@ -99,5 +101,58 @@ public class StudentController {
     public long getOptimizedSum() {
         long n = 1000000L;
         return n * (n + 1) / 2;
+    }
+
+    @GetMapping("/print-parallel")
+    public void printParallel() {
+        List<Student> students = studentService.getAllStudents();
+        System.out.println(students.get(0).getName());
+        System.out.println(students.get(1).getName());
+
+        Thread thread1 = new Thread(() -> {
+            System.out.println(students.get(2).getName());
+            System.out.println(students.get(3).getName());
+        });
+
+        Thread thread2 = new Thread(() -> {
+            System.out.println(students.get(4).getName());
+            System.out.println(students.get(5).getName());
+        });
+
+        thread1.start();
+        thread2.start();
+    }
+
+    @GetMapping("/print-synchronized")
+    public  ResponseEntity<Void> printSynchronized() {
+        List<Student> students = studentRepository.findAll();
+
+        if (students.size() >= 1) {
+            System.out.println(students.get(0).getName());
+        }
+        if (students.size() >= 2) {
+            System.out.println(students.get(1).getName());
+        }
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(() -> {
+            if (students.size() >= 3) {
+                System.out.println(students.get(2).getName());
+            }
+            if (students.size() >= 4) {
+                System.out.println(students.get(3).getName());
+            }
+        });
+
+        executor.submit(() -> {
+            if (students.size() >= 5) {
+                System.out.println(students.get(4).getName());
+            }
+            if (students.size() >= 6) {
+                System.out.println(students.get(5).getName());
+            }
+        });
+        executor.shutdown();
+        return ResponseEntity.ok().build();
     }
 }
