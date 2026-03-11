@@ -1,49 +1,162 @@
 package ru.hogwarts.school.controller;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repository.StudentRepository;
 import ru.hogwarts.school.service.StudentService;
 
-import java.util.Collection;
-import java.util.List;
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/student")
 public class StudentController {
 
     private StudentService studentService;
+    private StudentRepository studentRepository;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, StudentRepository studentRepository) {
         this.studentService = studentService;
+        this.studentRepository = studentRepository;
     }
 
     @PostMapping
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
+        Student created = studentService.createStudent(student);
+
+        URI location = URI.create("/student/" + created.getId());
+
+        return ResponseEntity.created(location).body(created);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Student> getStudentById(@PathVariable Long id) {
-        Student student = studentService.getStudentById(id);
-        if (student == null) {
+    public ResponseEntity<Optional<Student>> getStudentById(@PathVariable Long id) {
+        Optional<Student> student = studentService.getStudentById(id);
+
+        if (student != null && student.isPresent()) {
+            return ResponseEntity.ok(Optional.of(student.get()));
+        } else {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(student);
     }
 
     @GetMapping
-    public ResponseEntity<Collection<Student>> getAllStudent() {
+    public ResponseEntity<Collection<Student>> getAllStudent(@RequestParam(required = false) Integer age,
+                                                             @RequestParam(required = false) Integer age2) {
         return ResponseEntity.ok(studentService.getAllStudents());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteStudent(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/age/{age}")
     public List<Student> getStudentsByAge(@PathVariable int age) {
         return studentService.getStudentsByAge(age);
+    }
+
+    @GetMapping("/{id}/faculty")
+    public ResponseEntity<Faculty> getFacultyById(@PathVariable Long id) {
+        Faculty faculty = studentService.getFacultyById(id);
+        return ResponseEntity.ok(faculty);
+    }
+
+    @GetMapping("/names-starting-with-a")
+    public List<String> getAllNamesStartingWithA() {
+        return studentService.getAllStudents().stream().map(Student::getName)
+                .filter(name -> name != null && name.toUpperCase().startsWith("A"))
+                .map(String::toUpperCase).sorted().collect(Collectors.toList());
+    }
+
+    @GetMapping("/average-age")
+    public Double getAverageAge() {
+        List<Student> students = studentRepository.findAll();
+        if (students.isEmpty()) {
+            return 0.0;
+        }
+
+        return students.stream().mapToInt(Student::getAge)
+                .average().orElse(0.0);
+    }
+
+    @GetMapping("/longest-faculty-name")
+    public String getLongestFacultyName() {
+        return studentRepository.findAll().stream()
+                .map(Student::getFaculty)
+                .filter(Objects::nonNull)
+                .map(Faculty::getName).
+                filter(name -> name != null && !name.trim().isEmpty())
+                .max(Comparator.comparing(String::length))
+                .orElse("");
+    }
+
+    @GetMapping("/optimized-sum")
+    public long getOptimizedSum() {
+        long n = 1000000L;
+        return n * (n + 1) / 2;
+    }
+
+    @GetMapping("/print-parallel")
+    public void printParallel() {
+        List<Student> students = studentService.getAllStudents();
+        System.out.println(students.get(0).getName());
+        System.out.println(students.get(1).getName());
+
+        Thread thread1 = new Thread(() -> {
+            System.out.println(students.get(2).getName());
+            System.out.println(students.get(3).getName());
+        });
+
+        Thread thread2 = new Thread(() -> {
+            System.out.println(students.get(4).getName());
+            System.out.println(students.get(5).getName());
+        });
+
+        thread1.start();
+        thread2.start();
+    }
+
+    private synchronized void printStudentName(String name) {
+        System.out.println("Студент: " + name);
+    }
+
+    @GetMapping("/print-synchronized")
+    public  ResponseEntity<Void> printSynchronized() {
+        List<Student> students = studentRepository.findAll();
+
+        if (students.size() >= 1) {
+            printStudentName(students.get(0).getName());
+        }
+        if (students.size() >= 2) {
+            printStudentName(students.get(1).getName());
+        }
+
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+        executor.submit(() -> {
+            if (students.size() >= 3) {
+                printStudentName(students.get(2).getName());
+            }
+            if (students.size() >= 4) {
+                printStudentName(students.get(3).getName());
+            }
+        });
+
+        executor.submit(() -> {
+            if (students.size() >= 5) {
+                printStudentName(students.get(4).getName());
+            }
+            if (students.size() >= 6) {
+                printStudentName(students.get(5).getName());
+            }
+        });
+        executor.shutdown();
+        return ResponseEntity.ok().build();
     }
 }

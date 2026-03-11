@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-index-on-student-name
+      author: your-name
+      changes:
+        - createIndex:
+            tableName: students
+            indexName: idx_student_name
+            columns:
+              - column:
+                  name: name
+                  type: varchar(255)
+
+  - changeSet:
+      id: add-composite-index-on-faculty-name-color
+      author: your-name
+      changes:
+        - createIndex:
+            tableName: faculties
+            indexName: idx_faculty_name_color
+            columns:
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: color
+                  type: varchar(50)
